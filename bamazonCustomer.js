@@ -2,6 +2,7 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 
 var con = mysql.createConnection({
+    // enter your user & password
     user: 'root',
     password: 'password',
     database: 'bamazon_db',
@@ -11,6 +12,8 @@ var con = mysql.createConnection({
 con.connect(function(err) {
     if (err) throw err;
     console.log("Connected");
+
+    // query database. Then loop through result to list all items for sale
     con.query("SELECT * FROM products", function (err, result) {
         if (err) throw err;
         console.log("Welcome to Bamazon. Items for sale are:")
@@ -35,15 +38,42 @@ function start() {
       {
         name: "quantity",
         type: "number",
-        message: "How many would you like?"
+        message: "How many would you like?",
+        validate: function(value) {
+          if (isNaN(value) === false && Number.isInteger(value)) {
+            return true;
+          }
+          return false;
+        }
       }])
       .then(function(answer) {
-          if (parseInt(answer.quantity) > result[parseInt(answer.productChoice) - 1].stock_quantity) {
-            console.log("Sorry! Insufficient quantity. Your order connot be processed.")
-          } else {
-            console.log("Order confirmed.")
-          }
-      })
-  })
+        var userChoice = result[parseInt(answer.productChoice) - 1];
+        var userQty = parseInt(answer.quantity);
+        var newQty = userChoice.stock_quantity - userQty;
+        console.log("You chose " + userQty + " of the " + userChoice.product_name + "s.");
+
+        if (userQty > userChoice.stock_quantity) {
+          console.log("Sorry! Insufficient quantity. Your order connot be processed.");
+          start();
+        } else {
+
+          // update database with new quantity & let user know order confirmed & total price
+          // con.query("UPDATE products SET ? WHERE ?", [
+          //   {
+          //     stock_quantity: newQty
+          //   },
+          //   {
+          //     item_id: userChoice
+          //   }
+          // ], function(err) {
+          //   if (err) throw err;
+          //   console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".")
+          // });
+          console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".");
+          start();
+
+        }
+      });
+  });
 } 
 
