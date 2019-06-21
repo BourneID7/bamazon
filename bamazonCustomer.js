@@ -49,27 +49,25 @@ function start() {
       .then(function(answer) {
         var userChoice = result[parseInt(answer.productChoice) - 1];
         var userQty = parseInt(answer.quantity);
-        var newQty = userChoice.stock_quantity - userQty;
+
         console.log("You chose " + userQty + " of the " + userChoice.product_name);
 
         if (userQty > userChoice.stock_quantity) {
           console.log("Insufficient quantity available. Your order cannot be processed.");
           start();
         } else {
-          console.log(userChoice.stock_quantity - userQty);
           // update database with new quantity, confirm order & give user total price
-          con.query("UPDATE products SET ? WHERE ?", [
-            {
-              stock_quantity: newQty
-            },
-            {
-              item_id: userChoice
-            }
-          ], function(err) {
-            if (err) throw err;
-            console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".")
-          });
-          // console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".");
+            con.query("UPDATE products SET ? WHERE ?", [
+              {
+                stock_quantity: (userChoice.stock_quantity - userQty)
+              },
+              {
+                item_id: userChoice.item_id
+              }
+            ], function(err) {
+              if (err) throw err;
+              console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".")
+            });
           start();
         }
       })
