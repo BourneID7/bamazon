@@ -158,9 +158,6 @@ function addProduct() {
             con.query(query, values, function(err, result) {
                 if (err) throw err;
                 console.log("\n" + result.affectedRows + " product added successfully");
-                for (i = 9; i < result.length; i++) {
-                    console.log("Item added: " + result[i].product_name + ", " + result[i].retail_price + ", quantity: " + result[i].stock_quantity + "\n");
-                }
             });
         start();
     });
