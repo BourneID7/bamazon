@@ -66,8 +66,7 @@ function start() {
               }
             ], function(err) {
               if (err) throw err;
-              console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty) + ".");
-              console.log("New quantity available of " + userChoice.product_name + ": " + userChoice.stock_quantity);
+              console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty).toFixed(2) + ".");
             });
           start();
         }
