@@ -68,13 +68,19 @@ function lowInventory() {
 function addInventory() {
     con.query("SELECT * FROM products", function (err, result) {
         if (err) throw err;
+        var productChoiceList = [];
+        for (i = 0; i < result.length; i++) {
+        var itemNums = result[i].item_id;
+        productChoiceList.push(itemNums);
+
+        }
     inquirer
         .prompt([
         {
             name: "productChoice",
             type: "list",
             message: "To which product would you like to add inventory?",
-            choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            choices: productChoiceList
         },
         {
             name: "quantity",
@@ -103,9 +109,8 @@ function addInventory() {
             if (err) throw err;
             console.log("\n" + result.affectedRows + " product updated");
             console.log("Inventory level of " + userChoice.product_name + ": " + (userChoice.stock_quantity + userQty));
-
+            start();
         });
-        start();
         });
     });
 }
@@ -158,7 +163,8 @@ function addProduct() {
             con.query(query, values, function(err, result) {
                 if (err) throw err;
                 console.log("\n" + result.affectedRows + " product added successfully");
+                start();
+
             });
-        start();
     });
 }

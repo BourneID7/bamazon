@@ -26,6 +26,12 @@ con.connect(function(err) {
 
 function start() {
   con.query("SELECT * FROM products", function (err, result) {
+    var productChoiceList = [];
+    for (i = 0; i < result.length; i++) {
+      var itemNums = result[i].item_id;
+      productChoiceList.push(itemNums);
+
+    }
     if (err) throw err;
     inquirer
       .prompt([
@@ -33,7 +39,7 @@ function start() {
         name: "productChoice",
         type: "list",
         message: "Which Item ID would you like to buy?",
-        choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        choices: productChoiceList
       },
       {
         name: "quantity",
