@@ -53,31 +53,58 @@ function start() {
         }
       }])
       .then(function(answer) {
-        var userChoice = result[parseInt(answer.productChoice) - 1];
+        // var userChoice = result[parseInt(answer.productChoice) - 1];
+        var userChoice = parseInt(answer.productChoice);
         var userQty = parseInt(answer.quantity);
 
-        console.log("You chose " + userQty + " of the " + userChoice.product_name);
+        // loop through results to get item ids in case numbers are not sequential (i.e. item deleted from database)
+        for (i = 0; i < result.length; i++) {
+          if (result[i].item_id === userChoice) {
+            var userIndex = result[i];
 
-        if (userQty > userChoice.stock_quantity) {
-          console.log("Insufficient quantity available. Your order cannot be processed.");
-          start();
-        } else {
-          // update database with new quantity, confirm order & give user total price
-            con.query("UPDATE products SET ? WHERE ?", [
-              {
-                stock_quantity: (userChoice.stock_quantity - userQty)
-              },
-              {
-                item_id: userChoice.item_id
-              }
-            ], function(err) {
-              if (err) throw err;
-              console.log("Order confirmed. Your total is $" + (userChoice.retail_price * userQty).toFixed(2) + ".");
-            });
-          start();
+            console.log("You chose " + userQty + " of the " + userIndex.product_name);
+
+            if (userQty > userIndex.stock_quantity) {
+              console.log("Insufficient quantity available. Your order cannot be processed.");
+              start();
+            } else {
+              // update database with new quantity, confirm order & give user total price
+                con.query("UPDATE products SET ? WHERE ?", [
+                  {
+                    stock_quantity: (userIndex.stock_quantity - userQty)
+                  },
+                  {
+                    item_id: userIndex.item_id
+                  }
+                ], function(err) {
+                  if (err) throw err;
+                  console.log("Order confirmed. Your total is $" + (userIndex.retail_price * userQty).toFixed(2) + ".");
+                  quit();
+
+                });
+            }
+          }
         }
       })
       .catch(err);
   });
 } 
-
+// option to continue shopping or quit
+function quit() {
+  inquirer
+    .prompt([
+      {
+      name: "continue",
+      type: "list",
+      message: "Continue shopping?",
+      choices: ["Yes", "No"]
+    }])
+    .then(function(answer) {
+      if (answer.continue === "Yes") {
+        start();
+      } else {
+        console.log("Thank you for shopping at Bamazon.")
+        con.end();
+      }
+    })
+}
